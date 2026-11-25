@@ -46,6 +46,13 @@ def mse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         Hodnota MSE (python `float`), nezaporna.
     """
     # assert  Ověřte, že y_true a y_pred maji stejny tvar
+
+    assert y_true.shape == y_pred.shape, (
+        "y_true a y_pred musí mít stejný tvar"
+    )
+
+    return float(np.mean((y_true - y_pred) ** 2))
+
     raise NotImplementedError(
         "Úkol: vratte prumer druhych mocnin rozdilu y_true a y_pred jako python float."
     )
@@ -74,6 +81,13 @@ def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         Hodnota MAE (python `float`), nezaporna.
     """
     # assert  Ověřte, že y_true a y_pred maji stejny tvar
+
+    assert y_true.shape == y_pred.shape, (
+        "y_true a y_pred musí mít stejný tvar"
+    )
+
+    return float(np.mean(np.abs(y_true - y_pred)))
+
     raise NotImplementedError(
         "Úkol: vratte prumer absolutnich hodnot rozdilu y_true a y_pred jako python float."
     )
@@ -109,6 +123,19 @@ def r2(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     # assert  Ověřte, že y_true a y_pred maji stejny tvar
     # assert  Ověřte, že ss_tot > 0 (y_true neni konstantni)
+
+    assert y_true.shape == y_pred.shape, (
+        "y_true a y_pred musí mít stejný tvar"
+    )
+
+    ss_res = np.sum((y_true - y_pred) ** 2)
+
+    ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+
+    assert ss_tot > 0, "y_true nesmí být konstantní"
+
+    return float(1 - ss_res / ss_tot)
+
     raise NotImplementedError(
         "Úkol: spocitejte ss_res a ss_tot podle docstringu a vratte 1 - ss_res / ss_tot "
         "jako python float."
@@ -155,6 +182,17 @@ def persistence_baseline(series: np.ndarray, window_size: int) -> np.ndarray:
     # assert  Ověřte, že series je 1D pole
     # assert  Ověřte, že window_size >= 1
     # assert  Ověřte, že len(series) > window_size
+
+    series = np.asarray(series, dtype=np.float64)
+
+    assert series.ndim == 1, "Časová řada musí být jednorozměrná"
+    assert window_size >= 1, "window_size musí být alespoň 1"
+    assert len(series) > window_size, (
+        "Časová řada musí být delší než velikost okna"
+    )
+
+    return series[window_size - 1: -1].copy()
+
     raise NotImplementedError(
         "Úkol: vratte pole predpovedi, kde predpoved pro kazdy cil je posledni "
         "znama hodnota pred nim (viz priklad v docstringu); vysledek musi byt nove pole "

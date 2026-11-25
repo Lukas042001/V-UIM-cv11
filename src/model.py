@@ -68,11 +68,30 @@ class MLP(nn.Module):
 
         # assert  Ověřte, že input_dim a output_dim jsou alespon 1
         # assert  Ověřte, že hidden_dims je neprazdny seznam kladnych cisel
-        raise NotImplementedError(
-            "Úkol: sestavte self.net jako nn.Sequential: pro kazdou skrytou vrstvu "
-            "nn.Linear (pocet vstupu = vystup predchozi vrstvy) a za nim nn.Tanh, "
-            "nakonec nn.Linear na output_dim BEZ aktivace (linearni vystup)."
-        )
+
+        assert input_dim >= 1, "input_dim musí být alespoň 1"
+        assert output_dim >= 1, "output_dim musí být alespoň 1"
+        assert len(hidden_dims) > 0, "hidden_dims nesmí být prázdný"
+        assert all(h >= 1 for h in hidden_dims), "Počet neuronů musí být kladný"
+
+        layers = []
+        prev_dim = input_dim
+
+        for h in hidden_dims:
+            layers.append(nn.Linear(prev_dim, h))
+            layers.append(nn.Tanh())
+            prev_dim = h
+
+        layers.append(nn.Linear(prev_dim, output_dim))
+
+        self.net = nn.Sequential(*layers)
+
+
+        # raise NotImplementedError(
+        #     "Úkol: sestavte self.net jako nn.Sequential: pro kazdou skrytou vrstvu "
+        #     "nn.Linear (pocet vstupu = vystup predchozi vrstvy) a za nim nn.Tanh, "
+        #     "nakonec nn.Linear na output_dim BEZ aktivace (linearni vystup)."
+        # )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Dopredny pruchod siti (UKOL).
@@ -88,6 +107,12 @@ class MLP(nn.Module):
             Predikce, tvar `(B, output_dim)`.
         """
         # assert  Ověřte, že x ma 2 rozmery a x.shape[1] == input_dim
+
+        assert x.ndim == 2, "Vstup musí mít 2 rozměry"
+        assert x.shape[1] == self.input_dim, "Nesprávný počet vstupních příznaků"
+
+        return self.net(x)
+
         raise NotImplementedError(
             "Úkol: vratte vystup self.net pro vstup x (nic dalsiho nepocitejte)."
         )

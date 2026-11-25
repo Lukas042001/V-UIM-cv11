@@ -175,6 +175,26 @@ class Trainer:
             Pokud se tvar predikce lisi od tvaru cilu.
         """
         # assert  Ověřte, že tvar predikce modelu je shodny s tvarem y_batch
+
+        self.optimizer.zero_grad()
+
+        y_pred = self.model(x_batch)
+
+        assert y_pred.shape == y_batch.shape, (
+            f"Nesouhlasí tvary predikce {y_pred.shape} "
+            f"a cílových hodnot {y_batch.shape}"
+        )
+
+        loss = self.loss_fn(y_pred, y_batch)
+
+        loss_value = loss.item()
+
+        loss.backward()
+
+        self.optimizer.step()
+
+        return loss_value
+
         raise NotImplementedError(
             "Úkol: doplnte jeden trenovaci krok podle ocislovanych kroku v docstringu: "
             "vynulovani gradientu optimizeru, dopredny pruchod modelu, vypocet ztraty, "
@@ -336,9 +356,14 @@ class Trainer:
             Cesta k souboru (napr. `models/mlp_diabetes.pt`).
         """
         # assert  Ověřte, že path konci priponou .pt
-        raise NotImplementedError(
-            "Úkol: ulozte do souboru path slovnik vah modelu (state_dict) pomoci torch.save."
-        )
+
+        assert path.endswith(".pt"), "Soubor musí mít příponu .pt"
+
+        torch.save(self.model.state_dict(), path)
+
+        # raise NotImplementedError(
+        #     "Úkol: ulozte do souboru path slovnik vah modelu (state_dict) pomoci torch.save."
+        # )
 
     @classmethod
     def load(cls, path: str, model: nn.Module, config: "TrainingConfig") -> "Trainer":
@@ -359,6 +384,18 @@ class Trainer:
             Trainer s nactenym modelem.
         """
         # assert  Ověřte, že soubor path existuje
+
+        assert os.path.isfile(path), f"Soubor neexistuje: {path}"
+
+        state_dict = torch.load(
+            path,
+            weights_only=True
+        )
+
+        model.load_state_dict(state_dict)
+
+        return cls(model, config)
+
         raise NotImplementedError(
             "Úkol: nactete vahy ze souboru path (torch.load s weights_only=True) do "
             "predaneho modelu pomoci load_state_dict a vratte novy Trainer(model, config)."

@@ -145,6 +145,18 @@ class WindowedDataset(Dataset):
         # assert  Ověřte, že series je 1D pole (rozmer zkontrolujte pred jakymkoli reshape)
         # assert  Ověřte, že window_size >= 1
         # assert  Ověřte, že len(series) > window_size
+
+        series = np.asarray(series, dtype=np.float32)
+
+        assert series.ndim == 1, "Časová řada musí být jednorozměrná"
+        assert window_size >= 1, "window_size musí být alespoň 1"
+        assert len(series) > window_size, (
+            "Časová řada musí být delší než velikost okna"
+        )
+
+        self.series = torch.as_tensor(series)
+        self.window_size = window_size
+
         raise NotImplementedError(
             "Úkol: prevedte radu na 1D pole float32 a z nej na tenzor; "
             "ulozte self.series a self.window_size."
@@ -158,6 +170,9 @@ class WindowedDataset(Dataset):
         int
             `len(self.series) - self.window_size`.
         """
+
+        return len(self.series) - self.window_size
+
         raise NotImplementedError(
             "Úkol: vratte pocet oken = delka rady minus window_size."
         )
@@ -178,6 +193,16 @@ class WindowedDataset(Dataset):
         tuple[torch.Tensor, torch.Tensor]
             Dvojice `(x, y)` s tvary `(window_size,)` a `(1,)`, oba `float32`.
         """
+
+        if idx < 0 or idx >= len(self):
+            raise IndexError("Index mimo rozsah datasetu")
+
+        x = self.series[idx: idx + self.window_size]
+
+        y = self.series[idx + self.window_size].reshape(1)
+
+        return x, y
+
         raise NotImplementedError(
             "Úkol: x = window_size po sobe jdoucich hodnot signalu od indexu idx, "
             "y = hodnota hned za oknem jako tenzor tvaru (1,); vratte dvojici (x, y)."
